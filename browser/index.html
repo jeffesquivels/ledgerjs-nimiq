@@ -1,0 +1,107 @@
+<html>
+<head>
+    <script src="ledgerjs-nimiq.js"></script>
+    <script>
+
+        const openTimeout = 3600000;
+        const exchangeTimeout = 29 * 1000;
+        let _api = null;
+        let _appVersion = null;
+
+        function getPublicKey(confirm) {
+          let bip32Path = document.getElementById('bip32Path').value;
+          return connect().then(function (api) {
+            const msg = confirm ? 'Confirm public key...' : 'Getting public key...';
+            displayStatus(msg);
+//            disableControls(true);
+            return api.getPublicKey(bip32Path, true, confirm).then((result) => {
+              displayAddress(result.publicKey);
+              displayStatus('Received public key');
+//              disableControls(false);
+              return result.publicKey;
+            }).catch((error) => {
+              displayStatus('Failed to get public key: ' + error);
+              throw error;
+            });
+          });
+        }
+
+        function open() {
+          displayStatus('Opening');
+          return LedgerjsNimiq.Transport.create(openTimeout).then((transport) => {
+            transport.setDebugMode(true);
+//            transport.setExchangeTimeout(exchangeTimeout);
+            _api = new LedgerjsNimiq.Api(transport);
+            displayStatus('Opened');
+            return _api;
+          }).catch((err) => {
+            displayStatus('Error opening: ' + err);
+          });
+        }
+
+        function connect() {
+          if (_api === null) {
+            return open().then((api) => {
+              return api.getAppConfiguration().then((result) => {
+                _appVersion = result.version;
+                displayStatus('Connected (app version ' + _appVersion + ')');
+                return api;
+              });
+            });
+          } else {
+            return _api.getAppConfiguration().then((result) => {
+              _appVersion = result.version;
+              displayStatus('Connected (app version ' + _appVersion + ')');
+              return _api;
+            }).catch((err) => {
+              _api = null;
+              console.log(err);
+              return connect();
+            });
+          }
+        }
+
+        function displayStatus(msg) {
+          console.log(msg);
+          document.getElementById('status').innerHTML = msg;
+        }
+
+        function displayAddress(address) {
+          document.getElementById('address').innerHTML = address;
+        }
+
+        function init() {
+          connect().then(function () {
+            disableControls(false);
+          })
+        }
+
+        function disableControls(disable) {
+          const inputs = document.getElementsByTagName('input');
+          const confirmPkEnabled = Number(_appVersion.substring(0, _appVersion.indexOf('.'))) >= 1;
+          for(let i = 0; i < inputs.length; i++){
+            if (inputs[i].id === 'confirmPublicKey' && !confirmPkEnabled) {
+              continue;
+            }
+            inputs[i].disabled = disable;
+          }
+        }
+
+    </script>
+</head>
+<body onload="init()">
+<div>Status: <span id="status" style="font-family: monospace; font-size: 15px;"></span></div>
+<div>&nbsp;</div>
+<div id="connectForm">
+    <input id='connect' type="button" onClick="connect()" value="Connect" disabled>
+</div>
+<div>&nbsp;</div>
+<div id="addressForm">
+  <input type="text" id="bip32Path" value="44'/242'/0'" disabled>
+  <input id='getPublicKey' type="button" onClick="getPublicKey(false)" value="Get Public Key" disabled>
+  <input id='confirmPublicKey' type="button" onClick="getPublicKey(true)" value="Confirm Public Key" disabled>
+</div>
+<div>&nbsp;</div>
+<div>Public Key: <span id="address" style="font-family: monospace; font-size: 15px;"></span></div>
+</body>
+</html>

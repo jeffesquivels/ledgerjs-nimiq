@@ -1,0 +1,19 @@
+{
+  "name": "nimiqjs-ledger",
+  "version": "0.0.0",
+  "dependencies": {
+    "@ledgerhq/hw-transport-node-hid": "^4.6.0",
+    "@ledgerhq/hw-transport-u2f": "^4.6.0",
+    "@ledgerhq/hw-app-nim": "file:/home/jeffrey/nimiq/ledgerdev/ledgerjs/packages/hw-app-nim",
+    "babel-runtime": "^6.26.0"
+  },
+  "devDependencies": {
+    "browserify": "^13.1.0",
+    "uglify-js": "2.7.3"
+  },
+  "scripts": {
+    "browserify": "browserify --standalone LedgerjsNimiq --outfile browser/ledgerjs-nimiq.js src/browser.js",
+    "uglify": "uglifyjs -o browser/ledgerjs-nimiq.min.js browser/ledgerjs-nimiq.js",
+    "clean": "rm -rf browser"
+  }
+}
