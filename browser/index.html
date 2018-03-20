@@ -1,5 +1,6 @@
 <html>
 <head>
+    <script src="nimiq.js"></script>
     <script src="ledgerjs-nimiq.js"></script>
     <script>
 
@@ -14,7 +15,7 @@
             const msg = confirm ? 'Confirm public key...' : 'Getting public key...';
             displayStatus(msg);
 //            disableControls(true);
-            return api.getPublicKey(bip32Path, true, confirm).then((result) => {
+            return api.getPublicKey(bip32Path, false, confirm).then((result) => {
               displayAddress(result.publicKey);
               displayStatus('Received public key');
 //              disableControls(false);
@@ -24,6 +25,39 @@
               throw error;
             });
           });
+        }
+
+        function sign() {
+          signTransaction(document.getElementById('hexTx').value);
+        }
+
+        function signTransaction(tx) {
+          let buffer = Nimiq.BufferUtils.fromHex(tx);
+            // getPublicKey(false).then((publicKey) => {
+            //     displayStatus('Loading account data...');
+            //     loadAccount(publicKey).then((account) => {
+            //       const transaction = operation(account);
+                  connect().then((api) => {
+                    // StellarSdk.Network.useTestNetwork();
+                    let bip32Path = document.getElementById('bip32Path').value;
+                    displayStatus('Signing transaction...');
+//                    disableControls(true);
+                    api.signTransaction(bip32Path, buffer).then((result) => {
+                      // const txHash = transaction.hash();
+                      // const keyPair = StellarSdk.Keypair.fromPublicKey(publicKey);
+                      // if (keyPair.verify(txHash, result.signature)) {
+                      //   displayStatus('Transaction signed');
+                      // } else {
+                      //   displayStatus('Bad signature');
+                      // }
+                      displaySignature(result.signature.toString('hex'));
+//                      disableControls(false);
+                    }).catch(function (err) {
+                      displayStatus(err);
+                    });
+                  });
+            //     });
+            // });
         }
 
         function open() {
@@ -70,6 +104,10 @@
           document.getElementById('address').innerHTML = address;
         }
 
+        function displaySignature(signature) {
+          document.getElementById('signature').innerHTML = signature;
+        }
+
         function init() {
           connect().then(function () {
             disableControls(false);
@@ -103,5 +141,12 @@
 </div>
 <div>&nbsp;</div>
 <div>Public Key: <span id="address" style="font-family: monospace; font-size: 15px;"></span></div>
+-- <div>&nbsp;</div>
+<div id="form">
+    <input type="text" id="hexTx" value="0000573dbdf6a7d83925ecf0ba0022a9a86c9be3c081008626c5378734e05d71cb4034eb97741909764e6e0000000000000f4240000000000000000a00000e790200">
+    <input id='signTx' type="button" onClick="sign()" value="Sign" disabled>
+</div>
+<div>&nbsp;</div>
+<div>Signature: <span id="signature" style="font-family: monospace; font-size: 15px;"></span></div>
 </body>
 </html>

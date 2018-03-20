@@ -2,8 +2,7 @@
   "name": "nimiqjs-ledger",
   "version": "0.0.0",
   "dependencies": {
-    "@ledgerhq/hw-transport-node-hid": "^4.6.0",
-    "@ledgerhq/hw-transport-u2f": "^4.6.0",
+    "@ledgerhq/hw-transport-u2f": "^4.7.3",
     "@ledgerhq/hw-app-nim": "file:/home/jeffrey/nimiq/ledgerdev/ledgerjs/packages/hw-app-nim",
     "babel-runtime": "^6.26.0"
   },
