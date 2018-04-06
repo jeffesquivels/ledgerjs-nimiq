@@ -10,18 +10,36 @@
         let _appVersion = null;
 
         function getPublicKey(confirm) {
-          let bip32Path = document.getElementById('bip32Path').value;
+          let bip32Path = document.getElementById('bip32PathPK').value;
           return connect().then(function (api) {
             const msg = confirm ? 'Confirm public key...' : 'Getting public key...';
             displayStatus(msg);
 //            disableControls(true);
             return api.getPublicKey(bip32Path, false, confirm).then((result) => {
-              displayAddress(result.publicKey);
+              displayPublicKey(result.publicKey.toString('hex'));
               displayStatus('Received public key');
 //              disableControls(false);
               return result.publicKey;
             }).catch((error) => {
               displayStatus('Failed to get public key: ' + error);
+              throw error;
+            });
+          });
+        }
+
+        function getAddress(confirm) {
+          let bip32Path = document.getElementById('bip32Path').value;
+          return connect().then(function (api) {
+            const msg = confirm ? 'Confirm address...' : 'Getting address...';
+            displayStatus(msg);
+//            disableControls(true);
+            return api.getAddress(bip32Path, true, confirm).then((result) => {
+              displayAddress(result.address);
+              displayStatus('Received address');
+//              disableControls(false);
+              return result.address;
+            }).catch((error) => {
+              displayStatus('Failed to get address: ' + error);
               throw error;
             });
           });
@@ -100,6 +118,10 @@
           document.getElementById('status').innerHTML = msg;
         }
 
+        function displayPublicKey(address) {
+          document.getElementById('publicKey').innerHTML = address;
+        }
+
         function displayAddress(address) {
           document.getElementById('address').innerHTML = address;
         }
@@ -116,11 +138,7 @@
 
         function disableControls(disable) {
           const inputs = document.getElementsByTagName('input');
-          const confirmPkEnabled = Number(_appVersion.substring(0, _appVersion.indexOf('.'))) >= 1;
           for(let i = 0; i < inputs.length; i++){
-            if (inputs[i].id === 'confirmPublicKey' && !confirmPkEnabled) {
-              continue;
-            }
             inputs[i].disabled = disable;
           }
         }
@@ -134,13 +152,21 @@
     <input id='connect' type="button" onClick="connect()" value="Connect" disabled>
 </div>
 <div>&nbsp;</div>
-<div id="addressForm">
-  <input type="text" id="bip32Path" value="44'/242'/0'" disabled>
+<div id="publicKeyForm">
+  <input type="text" id="bip32PathPK" value="44'/242'/0'/0'" disabled>
   <input id='getPublicKey' type="button" onClick="getPublicKey(false)" value="Get Public Key" disabled>
   <input id='confirmPublicKey' type="button" onClick="getPublicKey(true)" value="Confirm Public Key" disabled>
 </div>
 <div>&nbsp;</div>
-<div>Public Key: <span id="address" style="font-family: monospace; font-size: 15px;"></span></div>
+<div>Public Key: <span id="publicKey" style="font-family: monospace; font-size: 15px;"></span></div>
+-- <div>&nbsp;</div>
+<div id="addressForm">
+  <input type="text" id="bip32Path" value="44'/242'/0'/0'" disabled>
+  <input id='getAddress' type="button" onClick="getAddress(false)" value="Get Address" disabled>
+  <input id='confirmAddress' type="button" onClick="getAddress(true)" value="Confirm Address" disabled>
+</div>
+<div>&nbsp;</div>
+<div>Address: <span id="address" style="font-family: monospace; font-size: 15px;"></span></div>
 -- <div>&nbsp;</div>
 <div id="form">
     <input type="text" id="hexTx" value="0000573dbdf6a7d83925ecf0ba0022a9a86c9be3c081008626c5378734e05d71cb4034eb97741909764e6e0000000000000f4240000000000000000a00000e790200">
