@@ -16,7 +16,7 @@
             displayStatus(msg);
 //            disableControls(true);
             return api.getPublicKey(bip32Path, false, confirm).then((result) => {
-              displayPublicKey(result.publicKey.toString('hex'));
+              displayPublicKey(Nimiq.BufferUtils.toHex(result.publicKey));
               displayStatus('Received public key');
 //              disableControls(false);
               return result.publicKey;
@@ -68,7 +68,7 @@
                       // } else {
                       //   displayStatus('Bad signature');
                       // }
-                      displaySignature(result.signature.toString('hex'));
+                      displaySignature(Nimiq.BufferUtils.toHex(result.signature));
 //                      disableControls(false);
                     }).catch(function (err) {
                       displayStatus(err);
